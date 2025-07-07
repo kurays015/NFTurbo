@@ -49,6 +49,7 @@ export default function NFTRaffleRace() {
 
   const {
     data: nfts,
+    isError,
     error,
     isLoading,
     refetch: refetchNFTs,
@@ -259,7 +260,7 @@ export default function NFTRaffleRace() {
   }, [isTransferTxSuccess, refetchNFTs]);
 
   // Early returns for loading, error, or no NFTs
-  if (isLoading || nfts === undefined)
+  if (isLoading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-center">
@@ -269,22 +270,13 @@ export default function NFTRaffleRace() {
       </div>
     );
 
-  if (error)
+  if (isError)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
         <div className="text-center p-8 bg-red-900/20 border border-red-500/50 rounded-lg">
           <h1 className="text-2xl text-red-400">
             Error loading NFTs: {error.message}
           </h1>
-        </div>
-      </div>
-    );
-
-  if (!nfts.tokens.length)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-        <div className="text-center p-8 bg-slate-800/50 border border-slate-600/50 rounded-lg">
-          <h1 className="text-2xl text-gray-400">No NFTs found...</h1>
         </div>
       </div>
     );
