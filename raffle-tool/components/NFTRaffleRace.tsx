@@ -46,6 +46,7 @@ export default function NFTRaffleRace() {
     }[]
   >([]);
   const raceInterval = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const {
     data: nfts,
@@ -185,6 +186,12 @@ export default function NFTRaffleRace() {
     setShowConfetti(false);
     setRaceWinnerIdx(null);
 
+    // Play mingle music
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
+
     const numParticipants = validAddresses.length;
     const raceCharacters = generateRaceCharacters(numParticipants);
 
@@ -246,6 +253,14 @@ export default function NFTRaffleRace() {
     return () => clearInterval(raceInterval.current!);
   }, [raceInProgress, raceParticipants]);
 
+  // Stop music when race ends
+  useEffect(() => {
+    if (!raceInProgress && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [raceInProgress]);
+
   // After transfer, reset raffle state
   useEffect(() => {
     if (isTransferTxSuccess) {
@@ -258,6 +273,9 @@ export default function NFTRaffleRace() {
       setRacePositions([]);
     }
   }, [isTransferTxSuccess, refetchNFTs]);
+
+  // Calculate lane positions for current participants
+  const lanePositions = calculateLanePositions(raceParticipants.length);
 
   // Early returns for loading, error, or no NFTs
   if (isLoading)
@@ -281,11 +299,10 @@ export default function NFTRaffleRace() {
       </div>
     );
 
-  // Calculate lane positions for current participants
-  const lanePositions = calculateLanePositions(raceParticipants.length);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-800 text-gray-100 relative">
+      {/* Background music for race */}
+      <audio ref={audioRef} src="/mingle.mp3" preload="auto" />
       {showConfetti && (
         <Confetti
           width={window.innerWidth}

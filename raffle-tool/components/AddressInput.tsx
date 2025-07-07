@@ -20,7 +20,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
       htmlFor="addresses"
       className="block mb-3 font-semibold text-purple-300"
     >
-      Participant Addresses
+      Participant Addresses (0x..., 0x..., 0x..., ...):
     </Label>
     <Textarea
       id="addresses"
