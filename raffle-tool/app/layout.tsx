@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NFT Raaffle Race!",
+  title: "NFT's Raffle Race Royale!",
   description: "NFT Raaffle Race on Monad Testnet",
   creator: "Kurays",
 };
