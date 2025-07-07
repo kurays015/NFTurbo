@@ -401,16 +401,18 @@ export default function NFTRaffleRace() {
               />
             )}
             {/* NFT Display */}
-            <NFTDisplay
-              selectedNFT={selectedNFT}
-              isApprovalTxSuccess={isApprovalTxSuccess}
-              isApprovePending={isApprovePending}
-              isApprovalTxLoading={isApprovalTxLoading}
-              approveError={approveError}
-              handleApprove={handleApprove}
-              winners={winners}
-              isTransferTxSuccess={isTransferTxSuccess}
-            />
+            {!userAddress && (
+              <NFTDisplay
+                selectedNFT={selectedNFT}
+                isApprovalTxSuccess={isApprovalTxSuccess}
+                isApprovePending={isApprovePending}
+                isApprovalTxLoading={isApprovalTxLoading}
+                approveError={approveError}
+                handleApprove={handleApprove}
+                winners={winners}
+                isTransferTxSuccess={isTransferTxSuccess}
+              />
+            )}
           </div>
         </div>
       </div>
