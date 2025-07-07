@@ -7,6 +7,7 @@ interface AddressInputProps {
   setAddressInput: (val: string) => void;
   validAddresses: string[];
   uniqueAddresses: string[];
+  disabled?: boolean;
 }
 
 const AddressInput: React.FC<AddressInputProps> = ({
@@ -14,6 +15,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
   setAddressInput,
   validAddresses,
   uniqueAddresses,
+  disabled,
 }) => (
   <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
     <Label
@@ -29,6 +31,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
       placeholder={`Enter wallet addresses separated by commas:\n0x1234..., 0x5678..., 0x9abc...`}
       value={addressInput}
       onChange={e => setAddressInput(e.target.value)}
+      disabled={disabled}
     />
     <div className="flex justify-between items-center mt-3 text-sm">
       <span className="text-green-400">

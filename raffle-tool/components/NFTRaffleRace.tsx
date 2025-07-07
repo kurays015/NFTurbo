@@ -181,7 +181,7 @@ export default function NFTRaffleRace() {
 
   // Start the race
   const handleStartRace = () => {
-    if (!canPickWinners) return;
+    if (!canPickWinners || !userAddress) return;
     setWinners([]);
     setShowConfetti(false);
     setRaceWinnerIdx(null);
@@ -339,7 +339,7 @@ export default function NFTRaffleRace() {
           {/* Race Button */}
           <Button
             className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed mt-10 mb-4"
-            disabled={!canPickWinners || raceInProgress}
+            disabled={!userAddress || !canPickWinners || raceInProgress}
             onClick={handleStartRace}
           >
             {raceInProgress ? (
@@ -358,6 +358,7 @@ export default function NFTRaffleRace() {
               filteredNFTs={filteredNFTs}
               selectedIdx={selectedIdx}
               setSelectedIdx={setSelectedIdx}
+              disabled={!userAddress}
             />
             {/* Winner Count */}
             <WinnerCountSelector
@@ -365,6 +366,7 @@ export default function NFTRaffleRace() {
               setWinnerCount={setWinnerCount}
               tokenCount={tokenCount}
               validAddresses={validAddresses}
+              disabled={!userAddress}
             />
           </div>
 
@@ -375,6 +377,7 @@ export default function NFTRaffleRace() {
               setAddressInput={setAddressInput}
               validAddresses={validAddresses}
               uniqueAddresses={uniqueAddresses}
+              disabled={!userAddress}
             />
             {validAddresses.length < 2 && (
               <div className="text-amber-400 text-sm text-center">

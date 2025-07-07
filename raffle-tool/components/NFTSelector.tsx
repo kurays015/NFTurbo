@@ -21,12 +21,14 @@ interface NFTSelectorProps {
   filteredNFTs: NFTToken[];
   selectedIdx: number;
   setSelectedIdx: (idx: number) => void;
+  disabled?: boolean;
 }
 
 const NFTSelector: React.FC<NFTSelectorProps> = ({
   filteredNFTs,
   selectedIdx,
   setSelectedIdx,
+  disabled,
 }) => (
   <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
     <Label
@@ -38,6 +40,7 @@ const NFTSelector: React.FC<NFTSelectorProps> = ({
     <Select
       value={String(selectedIdx)}
       onValueChange={(value: string) => setSelectedIdx(Number(value))}
+      disabled={disabled}
     >
       <SelectTrigger className="w-full bg-slate-700 border-slate-600 text-white">
         <SelectValue placeholder="Choose NFT" />

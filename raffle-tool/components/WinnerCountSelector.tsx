@@ -13,6 +13,7 @@ interface WinnerCountSelectorProps {
   setWinnerCount: (count: number) => void;
   tokenCount: number;
   validAddresses: string[];
+  disabled?: boolean;
 }
 
 const WinnerCountSelector: React.FC<WinnerCountSelectorProps> = ({
@@ -20,6 +21,7 @@ const WinnerCountSelector: React.FC<WinnerCountSelectorProps> = ({
   setWinnerCount,
   tokenCount,
   validAddresses,
+  disabled,
 }) => (
   <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
     <Label
@@ -31,6 +33,7 @@ const WinnerCountSelector: React.FC<WinnerCountSelectorProps> = ({
     <Select
       value={String(winnerCount)}
       onValueChange={(value: string) => setWinnerCount(Number(value))}
+      disabled={disabled}
     >
       <SelectTrigger className="w-full bg-slate-700 border-slate-600 text-white">
         <SelectValue placeholder="Select winners count" />
