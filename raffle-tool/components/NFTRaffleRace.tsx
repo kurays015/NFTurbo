@@ -401,7 +401,7 @@ export default function NFTRaffleRace() {
               />
             )}
             {/* NFT Display */}
-            {!userAddress && (
+            {userAddress && (
               <NFTDisplay
                 selectedNFT={selectedNFT}
                 isApprovalTxSuccess={isApprovalTxSuccess}
