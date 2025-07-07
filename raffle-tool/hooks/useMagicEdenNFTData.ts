@@ -7,7 +7,7 @@ const fetchUserTokens = async (
 ): Promise<MagicEdenResponse> => {
   const response = await axios.get<MagicEdenResponse>(
     `https://api-mainnet.magiceden.dev/v3/rtp/monad-testnet/users/${
-      userAddress || "0x5686ac82D1BB3f1b3BCBa10DBB3170a11dc87236"
+      userAddress
     }/tokens/v7`
   );
   return response.data;
