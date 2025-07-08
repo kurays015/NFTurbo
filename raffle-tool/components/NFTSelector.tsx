@@ -6,58 +6,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import React from "react";
+import { useRaffleContext } from "@/context/raffle-context";
 
-interface NFTToken {
-  token: {
-    tokenId: string;
-    contract: string;
-    name?: string | null;
-    collection?: { name?: string | null };
+export default function NFTSelector() {
+  const {
+    selectedIdx,
+    setSelectedIdx,
+    setNftContractAddress,
+    raceInProgress,
+    userAddress,
+    collections,
+  } = useRaffleContext();
+
+  const handleCollectionChange = (value: string) => {
+    const idx = Number(value);
+    setSelectedIdx(idx);
+    const selectedCollection = collections?.collections[idx];
+    if (selectedCollection) {
+      setNftContractAddress(
+        selectedCollection.collection.primaryContract as `0x${string}`
+      );
+    } else {
+      setNftContractAddress(null);
+    }
   };
+
+  return (
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
+      <Label
+        htmlFor="nft-select"
+        className="block mb-3 font-semibold text-purple-300"
+      >
+        Select Collection to Raffle
+      </Label>
+      <Select
+        value={String(selectedIdx)}
+        onValueChange={handleCollectionChange}
+        disabled={raceInProgress || !userAddress}
+      >
+        <SelectTrigger className="w-full bg-slate-700 border-slate-600 text-white">
+          <SelectValue placeholder="Choose Collection" />
+        </SelectTrigger>
+        <SelectContent>
+          {collections?.collections.map((collection, idx) => (
+            <SelectItem key={collection.collection.id} value={String(idx)}>
+              {collection.collection.name}
+              {collection.ownership.tokenCount &&
+                ` (${collection.ownership.tokenCount} owned)`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
-
-interface NFTSelectorProps {
-  filteredNFTs: NFTToken[];
-  selectedIdx: number;
-  setSelectedIdx: (idx: number) => void;
-  disabled?: boolean;
-}
-
-const NFTSelector: React.FC<NFTSelectorProps> = ({
-  filteredNFTs,
-  selectedIdx,
-  setSelectedIdx,
-  disabled,
-}) => (
-  <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
-    <Label
-      htmlFor="nft-select"
-      className="block mb-3 font-semibold text-purple-300"
-    >
-      Select NFT to Raffle
-    </Label>
-    <Select
-      value={String(selectedIdx)}
-      onValueChange={(value: string) => setSelectedIdx(Number(value))}
-      disabled={disabled}
-    >
-      <SelectTrigger className="w-full bg-slate-700 border-slate-600 text-white">
-        <SelectValue placeholder="Choose NFT" />
-      </SelectTrigger>
-      <SelectContent>
-        {filteredNFTs.map((item, idx) => (
-          <SelectItem
-            key={item.token.tokenId + item.token.contract}
-            value={String(idx)}
-          >
-            {item.token.name || `#${item.token.tokenId}`}
-            {item.token.collection?.name && ` - ${item.token.collection.name}`}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
-
-export default NFTSelector;

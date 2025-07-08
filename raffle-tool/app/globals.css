@@ -121,9 +121,9 @@
 /* app/globals.css */
 [data-sonner-toast] {
   background: transparent !important; /* Remove white background */
-  border: none !important; /* Remove default border */
-  padding: 0 !important; /* Remove default padding */
-  box-shadow: none !important; /* Remove default shadow */
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Optional: Style specific toast elements */

@@ -1,100 +1,118 @@
 import React from "react";
 import Image from "next/image";
-import { Button } from "./ui/button";
+import { useRaffleContext } from "@/context/raffle-context";
 
-interface NFTDisplayProps {
-  selectedNFT: {
-    image?: string | null;
-    name?: string | null;
-    tokenId?: string;
-    collection?: { name?: string | null };
-    description?: string | null;
-  } | null;
-  isApprovalTxSuccess: boolean;
-  isApprovePending: boolean;
-  isApprovalTxLoading: boolean;
-  approveError: Error | null;
-  handleApprove: () => void;
-  winners: string[];
-  isTransferTxSuccess: boolean;
+export default function NFTDisplay() {
+  const {
+    userTokenNFTs,
+    isTokensLoading,
+    isTokensError,
+    tokensError,
+    selectedNFT,
+    selectedTokenIdx,
+    setSelectedTokenIdx,
+  } = useRaffleContext();
+  if (isTokensLoading) {
+    return (
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading tokens...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isTokensError) {
+    return (
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
+        <div className="text-center p-4 bg-red-900/20 border border-red-500/50 rounded">
+          <p className="text-red-400 break-words overflow-hidden">
+            Error loading tokens: {tokensError?.message}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedNFT) {
+    return (
+      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
+        <div className="text-center">
+          <p className="text-gray-400">Select an NFT Collection</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log(selectedNFT.token.image, "image");
+
+  return (
+    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
+      <h3 className="text-xl font-bold text-purple-300 mb-4 text-center">
+        Selected NFT
+      </h3>
+      {/* NFT Selection Grid */}
+      {userTokenNFTs.length > 0 && (
+        <div className="mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            {userTokenNFTs.map((token, idx) => (
+              <div
+                key={token.token.tokenId}
+                className={`cursor-pointer rounded-lg border-2 p-2 transition-all ${
+                  selectedTokenIdx === idx
+                    ? "border-pink-500 bg-slate-700/80"
+                    : "border-slate-700 bg-slate-800/50"
+                }`}
+                onClick={() => setSelectedTokenIdx(idx)}
+              >
+                <Image
+                  width={100}
+                  height={100}
+                  src={
+                    token.token.image ||
+                    token.token.imageSmall ||
+                    token.token.imageLarge ||
+                    "/placeholder.png"
+                  }
+                  alt={token.token.name || `NFT #${token.token.tokenId}`}
+                  className="w-full h-32 object-cover rounded mb-2"
+                />
+                <div className="text-center text-sm text-white font-semibold">
+                  {token.token.name || `NFT #${token.token.tokenId}`}
+                </div>
+                <div className="text-center text-xs text-purple-300 truncate">
+                  Token ID: {token.token.tokenId}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Approval Section */}
+      <div className="mt-6 pt-6 border-t border-slate-700">
+        {/* Status Messages */}
+        <div className="mt-4 space-y-2">
+          {/* {approveError && (
+            <div className="text-red-400 text-sm p-3 bg-red-900/20 border border-red-500/50 rounded">
+              <p className="break-words overflow-hidden">
+                Approval Error: {approveError.message}
+              </p>
+            </div>
+          )}
+          {isApprovalTxSuccess && (
+            <div className="text-green-400 text-sm p-3 bg-green-900/20 border border-green-500/50 rounded">
+              ✅ Approval successful! You can now transfer NFTs to winners.
+            </div>
+          )}
+          {isTransferTxSuccess && (
+            <div className="text-green-400 text-sm p-3 bg-green-900/20 border border-green-500/50 rounded">
+              ✅ Transfer successful! NFT has been sent to the winner.
+            </div>
+          )} */}
+        </div>
+      </div>
+    </div>
+  );
 }
-
-const NFTDisplay: React.FC<NFTDisplayProps> = ({
-  selectedNFT,
-  isApprovalTxSuccess,
-  isApprovePending,
-  isApprovalTxLoading,
-  approveError,
-  handleApprove,
-  winners,
-  isTransferTxSuccess,
-}) => (
-  <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
-    <h3 className="text-xl font-bold text-purple-300 mb-4 text-center">
-      Selected NFT
-    </h3>
-    <div className="flex flex-col items-center">
-      {selectedNFT?.image && (
-        <div className="relative mb-4">
-          <Image
-            width={200}
-            height={200}
-            src={selectedNFT.image}
-            alt={selectedNFT.name || `NFT #${selectedNFT.tokenId}`}
-            className="w-48 h-48 object-cover rounded-lg border-2 border-purple-500/50 shadow-lg"
-          />
-        </div>
-      )}
-      <div className="text-center space-y-2">
-        <div className="text-xl font-bold text-white">
-          {selectedNFT?.name || `NFT #${selectedNFT?.tokenId}`}
-        </div>
-        <div className="text-purple-300">
-          {selectedNFT?.collection?.name || "Unknown Collection"}
-        </div>
-        <div className="text-gray-400 text-sm">
-          Token ID: {selectedNFT?.tokenId}
-        </div>
-        {selectedNFT?.description && (
-          <div className="text-gray-500 text-sm max-w-md mx-auto">
-            {selectedNFT.description}
-          </div>
-        )}
-      </div>
-    </div>
-    {/* Approval Section */}
-    <div className="mt-6 pt-6 border-t border-slate-700">
-      {winners.length > 0 && !isTransferTxSuccess && !isApprovalTxSuccess && (
-        <Button
-          className="w-full bg-blue-600 hover:bg-blue-700 font-medium"
-          disabled={isApprovePending || isApprovalTxLoading || !selectedNFT}
-          onClick={handleApprove}
-        >
-          {isApprovePending || isApprovalTxLoading
-            ? "Approving..."
-            : "Approve NFT Transfer"}
-        </Button>
-      )}
-      {/* Status Messages */}
-      <div className="mt-4 space-y-2">
-        {approveError && (
-          <div className="text-red-400 text-sm p-3 bg-red-900/20 border border-red-500/50 rounded">
-            Approval Error: {approveError.message}
-          </div>
-        )}
-        {isApprovalTxSuccess && (
-          <div className="text-green-400 text-sm p-3 bg-green-900/20 border border-green-500/50 rounded">
-            ✅ Approval successful! You can now transfer NFTs to winners.
-          </div>
-        )}
-        {isTransferTxSuccess && (
-          <div className="text-green-400 text-sm p-3 bg-green-900/20 border border-green-500/50 rounded">
-            ✅ Transfer successful! NFT has been sent to the winner.
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
-export default NFTDisplay;

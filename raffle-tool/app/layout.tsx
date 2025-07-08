@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 import { Providers } from "./providers";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,6 +25,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} antialiased bg-monad`}>
         <Providers>{children}</Providers>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 8000,
+            unstyled: true,
+          }}
+        />
       </body>
     </html>
   );
