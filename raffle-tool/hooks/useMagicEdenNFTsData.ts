@@ -9,7 +9,7 @@ const fetchUserCollections = async (userAddress: `0x${string}`): Promise<Collect
   return response.data;
 };
 
-export const useMagicEdenNFTsData = (userAddress: `0x${string}`) => {
+export const useMagicEdenNFTsData = (userAddress: `0x${string}` | undefined) => {
   return useQuery({
     queryKey: ["userCollections"],
     queryFn: () => fetchUserCollections(),
