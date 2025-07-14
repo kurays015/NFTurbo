@@ -1,26 +1,82 @@
+"use client";
+
+import { useRaffleContext } from "@/context/raffle-context";
+import calculateLanePositions from "@/lib/calculateLanePositions";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect } from "react";
 
 export interface RaceParticipant {
   address: string;
   character: string;
 }
 
-interface RaceTrackProps {
-  raceParticipants: RaceParticipant[];
-  racePositions: number[];
-  lanePositions: number[];
-  raceInProgress: boolean;
-  raceWinnerIdx: number | null;
-}
+export default function RaceTrack() {
+  const {
+    raceInProgress,
+    raceParticipants,
+    racePositions,
+    raceWinnerIdx,
+    setShowConfetti,
+    setRaceWinnerIdx,
+    raceInterval,
+    setRaceInProgress,
+    setWinners,
+    setRacePositions,
+  } = useRaffleContext();
 
-const RaceTrack: React.FC<RaceTrackProps> = ({
-  raceParticipants,
-  racePositions,
-  lanePositions,
-  raceInProgress,
-  raceWinnerIdx,
-}) => {
+  const lanePositions = calculateLanePositions(raceParticipants.length);
+
+  // Race animation effect
+  useEffect(() => {
+    if (!raceInProgress || raceParticipants.length === 0) return;
+
+    setShowConfetti(false);
+    setRaceWinnerIdx(null);
+    if (raceInterval.current) clearInterval(raceInterval.current);
+
+    const finish = 900;
+    const minStep = 3;
+    const maxStep = 8;
+    const tickMs = 80;
+
+    raceInterval.current = setInterval(() => {
+      setRacePositions(prev => {
+        const newPositions = prev.map(pos => {
+          if (pos >= finish) return finish;
+          return Math.min(
+            pos + Math.floor(Math.random() * (maxStep - minStep + 1) + minStep),
+            finish
+          );
+        });
+
+        // Find winner
+        const winnerIdx = newPositions.findIndex(pos => pos >= finish);
+
+        if (winnerIdx !== -1) {
+          setRaceWinnerIdx(winnerIdx);
+          setRaceInProgress(false);
+          setShowConfetti(true);
+          if (raceInterval.current) clearInterval(raceInterval.current);
+          setWinners([raceParticipants[winnerIdx].address]);
+          setTimeout(() => setShowConfetti(false), 5000);
+        }
+
+        return newPositions;
+      });
+    }, tickMs);
+
+    return () => clearInterval(raceInterval.current!);
+  }, [
+    raceInProgress,
+    raceParticipants,
+    setRacePositions,
+    setRaceWinnerIdx,
+    setShowConfetti,
+    setWinners,
+    raceInterval,
+    setRaceInProgress,
+  ]);
+
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
       <h3 className="text-xl font-bold text-purple-300 mb-4 text-center">
@@ -126,6 +182,4 @@ const RaceTrack: React.FC<RaceTrackProps> = ({
       </div>
     </div>
   );
-};
-
-export default RaceTrack;
+}

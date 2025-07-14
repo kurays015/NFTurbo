@@ -8,17 +8,9 @@ import {
   SelectValue,
 } from "./ui/select";
 
-interface WinnerCountSelectorProps {
-  tokenCount: number;
-}
-
-export default function WinnerCountSelector({
-  tokenCount = 1,
-}: WinnerCountSelectorProps) {
+export default function WinnerCountSelector() {
   const { winnerCount, setWinnerCount, raceInProgress, userAddress } =
     useRaffleContext();
-
-  console.log("Winners Count: ", tokenCount);
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 p-6">
@@ -26,7 +18,7 @@ export default function WinnerCountSelector({
         htmlFor="winner-count"
         className="block mb-3 font-semibold text-purple-300"
       >
-        Number of Winners (one winner atm, soon to be multiple):
+        Number of Winners (one winner atm, soon to be multiple)
       </Label>
       <Select
         value={String(winnerCount)}

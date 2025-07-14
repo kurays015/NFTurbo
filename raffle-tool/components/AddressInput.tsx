@@ -18,7 +18,7 @@ export default function AddressInput() {
         htmlFor="addresses"
         className="block mb-3 font-semibold text-purple-300"
       >
-        Participant Addresses (0x..., 0x..., 0x..., ...):
+        Participant Addresses (0x..., 0x..., 0x...)
       </Label>
       <Textarea
         id="addresses"

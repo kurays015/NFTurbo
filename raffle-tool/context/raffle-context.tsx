@@ -28,7 +28,7 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import generateRaceCharacters from "@/lib/generateRaceCharacters";
 
-// Define the type for the context value
+// Define the type for the context valuea
 interface RaffleContextType {
   // State
   selectedIdx: number;
@@ -43,8 +43,6 @@ interface RaffleContextType {
   setWinners: Dispatch<SetStateAction<string[]>>;
   showConfetti: boolean;
   setShowConfetti: Dispatch<SetStateAction<boolean>>;
-  transferingTo: string | null;
-  setTransferringTo: Dispatch<SetStateAction<string | null>>;
   raceInProgress: boolean;
   setRaceInProgress: Dispatch<SetStateAction<boolean>>;
   racePositions: number[];
@@ -68,7 +66,6 @@ interface RaffleContextType {
   tokens: MagicEdenResponse | undefined;
   userTokenNFTs: TokenWithOwnership[];
   selectedNFT: TokenWithOwnership | undefined;
-  tokenCount: string | undefined;
   // Loading/Error
   isCollectionsLoading: boolean;
   isCollectionsError: boolean;
@@ -89,9 +86,11 @@ interface RaffleContextType {
   handleApprove: () => void;
   handleTransfer: (winner: string) => void;
   handleStartRace: () => void;
-  canPickWinners: boolean;
+  validParticipants: boolean;
   refetchCollections: () => void;
   refetchTokens: () => void;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const RaffleContext = createContext<RaffleContextType | null>(null);
@@ -108,7 +107,6 @@ export default function RaffleContextProvider({
   const [winnerCount, setWinnerCount] = useState(1);
   const [winners, setWinners] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [transferingTo, setTransferringTo] = useState<string | null>(null);
   const { address: userAddress } = useAccount();
   const [raceInProgress, setRaceInProgress] = useState(false);
   const [racePositions, setRacePositions] = useState<number[]>([]);
@@ -122,6 +120,7 @@ export default function RaffleContextProvider({
   const [nftContractAddress, setNftContractAddress] = useState<
     `0x${string}` | null
   >(null);
+  const [open, setOpen] = useState(false);
   const raceInterval = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -164,9 +163,6 @@ export default function RaffleContextProvider({
 
   const userTokenNFTs = tokens?.tokens || [];
   const selectedNFT = userTokenNFTs[selectedTokenIdx];
-  const tokenCount = collections?.collections.find(
-    collection => collection.collection.id === nftContractAddress
-  )?.ownership.tokenCount;
 
   // Approval/Transfer
   const {
@@ -238,7 +234,7 @@ export default function RaffleContextProvider({
   }, [transferData]);
 
   // Derived
-  const canPickWinners =
+  const validParticipants =
     validAddresses.length >= 2 &&
     winnerCount >= 1 &&
     winnerCount <= validAddresses.length;
@@ -254,21 +250,21 @@ export default function RaffleContextProvider({
     });
   };
 
-  const handleTransfer = () => {
-    setTransferringTo("0xd82464667aA6A0497A2AaF0ABfcbFb1324ad99B6");
+  const handleTransfer = (winner: string) => {
     writeTransfer({
-      address: "0x4bc6273235e3dbD1F927137cd27E38630edD381a",
+      address: NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
       abi: NFTTransferABI,
-      functionName: "safeTransferFrom",
+      functionName: "transferNFT",
       args: [
-        userAddress as `0x${string}`,
-        "0xd82464667aA6A0497A2AaF0ABfcbFb1324ad99B6",
-        6555n,
+        selectedNFT.token.contract as `0x${string}`,
+        BigInt(selectedNFT.token.tokenId),
+        winner as `0x${string}`,
       ],
     });
   };
 
   const handleStartRace = () => {
+    setOpen(false);
     setWinners([]);
     setShowConfetti(false);
     setRaceWinnerIdx(null);
@@ -276,7 +272,16 @@ export default function RaffleContextProvider({
     setRacePositions([]);
     setWinnerCount(1);
 
-    if (!canPickWinners || !userAddress || !selectedNFT) return;
+    if (!validParticipants) {
+      alert("Please enter at least 2 valid addresses");
+      return;
+    }
+
+    if (!selectedNFT) {
+      alert("Please select an NFT to raffle");
+      return;
+    }
+
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play();
@@ -286,10 +291,12 @@ export default function RaffleContextProvider({
     const shuffledAddresses = [...validAddresses].sort(
       () => Math.random() - 0.5
     );
+
     const participants = shuffledAddresses.map((address, index) => ({
       address,
       character: raceCharacters[index],
     }));
+
     setRaceParticipants(participants);
     setRacePositions(new Array(participants.length).fill(0));
     setRaceInProgress(true);
@@ -308,8 +315,6 @@ export default function RaffleContextProvider({
     setWinners,
     showConfetti,
     setShowConfetti,
-    transferingTo,
-    setTransferringTo,
     userAddress,
     raceInProgress,
     setRaceInProgress,
@@ -330,7 +335,6 @@ export default function RaffleContextProvider({
     tokens,
     userTokenNFTs,
     selectedNFT,
-    tokenCount,
     isCollectionsLoading,
     isCollectionsError,
     collectionsError,
@@ -348,10 +352,11 @@ export default function RaffleContextProvider({
     handleApprove,
     handleTransfer,
     handleStartRace,
-    canPickWinners,
-
+    validParticipants,
     refetchCollections,
     refetchTokens,
+    open,
+    setOpen,
   };
 
   return (
