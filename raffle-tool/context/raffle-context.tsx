@@ -152,7 +152,7 @@ export default function RaffleContextProvider({
     error: collectionsError,
     isLoading: isCollectionsLoading,
     refetch: refetchCollections,
-  } = useMagicEdenNFTsData();
+  } = useMagicEdenNFTsData(userAddress);
 
   const {
     data: tokens,
