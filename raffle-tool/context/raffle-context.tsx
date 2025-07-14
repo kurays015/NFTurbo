@@ -1,3 +1,5 @@
+"use client";
+
 import { useMagicEdenNFTsData } from "@/hooks/useMagicEdenNFTsData";
 import { useMagicEdenUserTokens } from "@/hooks/useMagicEdenUserTokens";
 import { NFTTransferABI } from "@/lib/abi";
@@ -24,6 +26,7 @@ import { CollectionResponse } from "@/types/collection";
 import { toast } from "sonner";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
+import generateRaceCharacters from "@/lib/generateRaceCharacters";
 
 // Define the type for the context value
 interface RaffleContextType {
@@ -87,8 +90,6 @@ interface RaffleContextType {
   handleTransfer: (winner: string) => void;
   handleStartRace: () => void;
   canPickWinners: boolean;
-  generateRaceCharacters: (numParticipants: number) => string[];
-  calculateLanePositions: (numParticipants: number) => number[];
   refetchCollections: () => void;
   refetchTokens: () => void;
 }
@@ -133,10 +134,12 @@ export default function RaffleContextProvider({
         .filter(a => a.length > 0),
     [addressInput]
   );
+
   const uniqueAddresses = useMemo(
     () => Array.from(new Set(parsedAddresses)),
     [parsedAddresses]
   );
+
   const validAddresses = useMemo(
     () => uniqueAddresses.filter(isValidAddress),
     [uniqueAddresses]
@@ -150,6 +153,7 @@ export default function RaffleContextProvider({
     isLoading: isCollectionsLoading,
     refetch: refetchCollections,
   } = useMagicEdenNFTsData();
+
   const {
     data: tokens,
     isError: isTokensError,
@@ -157,6 +161,7 @@ export default function RaffleContextProvider({
     isLoading: isTokensLoading,
     refetch: refetchTokens,
   } = useMagicEdenUserTokens(userAddress, nftContractAddress);
+
   const userTokenNFTs = tokens?.tokens || [];
   const selectedNFT = userTokenNFTs[selectedTokenIdx];
   const tokenCount = collections?.collections.find(
@@ -170,17 +175,20 @@ export default function RaffleContextProvider({
     isPending: isApprovePending,
     error: approveError,
   } = useWriteContract();
+
   const { isLoading: isApprovalTxLoading, isSuccess: isApprovalTxSuccess } =
     useWaitForTransactionReceipt({
       hash: approveData,
       query: { enabled: !!approveData },
     });
+
   const {
     writeContract: writeTransfer,
     data: transferData,
     isPending: isTransferPending,
     error: transferError,
   } = useWriteContract();
+
   const { isLoading: isTransferTxLoading, isSuccess: isTransferTxSuccess } =
     useWaitForTransactionReceipt({
       hash: transferData,
@@ -245,20 +253,21 @@ export default function RaffleContextProvider({
       args: [NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`, true],
     });
   };
-  const handleTransfer = (winner: string) => {
-    if (!selectedNFT || !winner) return;
-    setTransferringTo(winner);
+
+  const handleTransfer = () => {
+    setTransferringTo("0xd82464667aA6A0497A2AaF0ABfcbFb1324ad99B6");
     writeTransfer({
-      address: NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+      address: "0x4bc6273235e3dbD1F927137cd27E38630edD381a",
       abi: NFTTransferABI,
-      functionName: "transferNFT",
+      functionName: "safeTransferFrom",
       args: [
-        selectedNFT.token.contract as `0x${string}`,
-        BigInt(selectedNFT.token.tokenId),
-        winner as `0x${string}`,
+        userAddress as `0x${string}`,
+        "0xd82464667aA6A0497A2AaF0ABfcbFb1324ad99B6",
+        6555n,
       ],
     });
   };
+
   const handleStartRace = () => {
     setWinners([]);
     setShowConfetti(false);
@@ -284,41 +293,6 @@ export default function RaffleContextProvider({
     setRaceParticipants(participants);
     setRacePositions(new Array(participants.length).fill(0));
     setRaceInProgress(true);
-  };
-  // Utility
-  const generateRaceCharacters = (numParticipants: number) => {
-    const baseCharacters = [
-      "/chog.png",
-      "/fishnad.png",
-      "/molandak.png",
-      "/salmonad.png",
-    ];
-    const characters = [];
-    for (let i = 0; i < numParticipants; i++) {
-      characters.push(baseCharacters[i % baseCharacters.length]);
-    }
-    return characters;
-  };
-  const calculateLanePositions = (numParticipants: number) => {
-    const trackCenterY = 150;
-    let spacing = 45;
-    if (numParticipants <= 4) {
-      spacing = 45;
-    } else if (numParticipants <= 20) {
-      spacing = 15;
-    } else if (numParticipants <= 100) {
-      spacing = 2;
-    } else if (numParticipants <= 1000) {
-      spacing = 0;
-    } else {
-      spacing = -2;
-    }
-    const totalHeight = (numParticipants - 1) * spacing;
-    const startY = trackCenterY - totalHeight / 2;
-    return Array.from(
-      { length: numParticipants },
-      (_, i) => startY + i * spacing
-    );
   };
 
   const value: RaffleContextType = {
@@ -375,8 +349,7 @@ export default function RaffleContextProvider({
     handleTransfer,
     handleStartRace,
     canPickWinners,
-    generateRaceCharacters,
-    calculateLanePositions,
+
     refetchCollections,
     refetchTokens,
   };

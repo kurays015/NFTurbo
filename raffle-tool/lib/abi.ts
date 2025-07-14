@@ -8,4 +8,5 @@ export const NFTTransferABI = parseAbi([
   "function isApprovedForAll(address owner, address operator) view returns (bool)",
   "function getApproved(uint256 tokenId) view returns (address)",
   "function setApprovalForAll(address operator, bool approved)",
+  "function safeTransferFrom(address from, address to, uint256 tokenId)",
 ]);

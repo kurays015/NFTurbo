@@ -11,6 +11,7 @@ import AddressInput from "./AddressInput";
 import WinnerDisplay from "./WinnerDisplay";
 import NFTDisplay from "./NFTDisplay";
 import { useEffect } from "react";
+import calculateLanePositions from "@/lib/calculateLanePositions";
 
 export default function NFTRaffleRace() {
   const {
@@ -43,7 +44,6 @@ export default function NFTRaffleRace() {
     canPickWinners,
     refetchCollections,
     refetchTokens,
-    calculateLanePositions,
   } = useRaffleContext();
 
   // Race animation effect
