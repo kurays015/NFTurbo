@@ -8,7 +8,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <Image src="/monad-logo.svg" alt="Logo" height={50} width={50} />
           <span className="text-3xl font-extrabold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent tracking-tight">
-            NFT Raffle Race
+            NFT&apos;s Raffle Race Royale
           </span>
         </div>
         <ConnectButton />
