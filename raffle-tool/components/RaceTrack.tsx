@@ -146,7 +146,7 @@ export default function RaceTrack() {
       const finish = getFinishPosition();
       const minStep = 3;
       const maxStep = 10;
-      const tickMs = 120; // Smoother animation with faster updates
+      const tickMs = 200;
 
       raceInterval.current = setInterval(() => {
         setRacePositions(prev => {
