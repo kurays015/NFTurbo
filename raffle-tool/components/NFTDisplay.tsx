@@ -1,5 +1,3 @@
-import React from "react";
-import Image from "next/image";
 import { useRaffleContext } from "@/context/raffle-context";
 
 export default function NFTDisplay() {
@@ -64,14 +62,14 @@ export default function NFTDisplay() {
               onClick={() => setSelectedTokenIdx(idx)}
               disabled={raceInProgress}
             >
-              <Image
+              <img
                 width={72}
                 height={72}
                 src={
                   token.token.image ||
                   token.token.imageSmall ||
                   token.token.imageLarge ||
-                  "/placeholder.png"
+                  "/logo.png"
                 }
                 alt={`NFT #${token.token.tokenId}`}
                 className="w-full h-20 md:h-24 object-contain rounded mb-1 md:mb-2 text-white"

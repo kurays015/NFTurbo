@@ -1,6 +1,7 @@
 export default function calculateLanePositions(numParticipants: number) {
   const trackCenterY = 150;
   let spacing = 45;
+
   if (numParticipants <= 4) {
     spacing = 45;
   } else if (numParticipants <= 20) {
@@ -12,8 +13,10 @@ export default function calculateLanePositions(numParticipants: number) {
   } else {
     spacing = -2;
   }
+
   const totalHeight = (numParticipants - 1) * spacing;
   const startY = trackCenterY - totalHeight / 2;
+
   return Array.from(
     { length: numParticipants },
     (_, i) => startY + i * spacing

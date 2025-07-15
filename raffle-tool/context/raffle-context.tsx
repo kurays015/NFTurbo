@@ -31,8 +31,8 @@ import generateRaceCharacters from "@/lib/generateRaceCharacters";
 // Define the type for the context valuea
 interface RaffleContextType {
   // State
-  selectedIdx: number;
-  setSelectedIdx: Dispatch<SetStateAction<number>>;
+  selectedIdx: number | null;
+  setSelectedIdx: Dispatch<SetStateAction<number | null>>;
   selectedTokenIdx: number;
   setSelectedTokenIdx: Dispatch<SetStateAction<number>>;
   addressInput: string;
@@ -101,7 +101,7 @@ export default function RaffleContextProvider({
   children: React.ReactNode;
 }) {
   // State
-  const [selectedIdx, setSelectedIdx] = useState(0); // collection index
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null); // collection index
   const [selectedTokenIdx, setSelectedTokenIdx] = useState(0); // NFT index within tokens
   const [addressInput, setAddressInput] = useState("");
   const [winnerCount, setWinnerCount] = useState(1);

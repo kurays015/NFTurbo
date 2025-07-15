@@ -77,7 +77,7 @@ export default function WinnerDisplay() {
                     {index + 1}
                   </div>
                   <span className="font-mono text-green-300 text-sm">
-                    {winner}
+                    {winner.slice(0, 6)}...{winner.slice(-4)}
                   </span>
                 </div>
                 <Button

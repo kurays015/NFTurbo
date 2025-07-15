@@ -1,7 +1,12 @@
-import RaceTrack from "./RaceTrack";
+// import RaceTrack from "./RaceTrack";
 import WinnerDisplay from "./WinnerDisplay";
 import Audio from "./Audio";
 import WinnerConfetti from "./WinnerConfetti";
+import dynamic from "next/dynamic";
+
+const RaceTrack = dynamic(() => import("./RaceTrack"), {
+  ssr: false,
+});
 
 export default function NFTRaffleRace() {
   return (

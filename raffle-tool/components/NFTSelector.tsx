@@ -75,7 +75,7 @@ export default function NFTSelector() {
         Select Collection to Raffle
       </Label>
       <Select
-        value={String(selectedIdx)}
+        value={selectedIdx == null ? "" : String(selectedIdx)}
         onValueChange={handleCollectionChange}
         disabled={raceInProgress || !userAddress}
       >

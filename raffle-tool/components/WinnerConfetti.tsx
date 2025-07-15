@@ -7,7 +7,6 @@ export default function WinnerConfetti() {
   const { showConfetti } = useRaffleContext();
   return (
     <>
-      {" "}
       {showConfetti && (
         <Confetti
           width={window.innerWidth}

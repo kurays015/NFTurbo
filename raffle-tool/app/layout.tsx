@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import Header from "@/components/Header";
 import { RaffleSetup } from "@/components/RaffleSetup";
+import Footer from "@/components/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
             <div className="fixed -translate-x-1/2 -translate-y-1/2 bottom-4 left-1/2 z-50">
               <RaffleSetup />
             </div>
+            <Footer />
           </main>
         </Providers>
         <Toaster
