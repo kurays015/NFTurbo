@@ -13,8 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NFT's Raffle Race Royale!",
-  description: "NFT Raaffle Race on Monad Testnet",
+  title: "NFTurbo",
+  description:
+    "NFTurbo is a Web3 racing game built on the Monad blockchain, where NFTs are more than collectibles—they're the prize. Players compete in fast-paced, winner-takes-all races. One wallet crosses the finish line, and the winning address receives a rare NFT. No luck—just pure digital adrenaline. Connect. Race. Win.",
   creator: "Kurays",
 };
 
