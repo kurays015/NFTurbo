@@ -104,8 +104,7 @@ export default function WinnerDisplay() {
             {transferError && (
               <div className="text-red-400 text-sm p-3 bg-red-900/20 border border-red-500/50 rounded">
                 <p className="break-words overflow-hidden">
-                  <span className="font-semibold">Transfer Error:</span> The NFT
-                  is not transferable (soulbound NFT).
+                  <span className="font-semibold">Transfer Error:</span>
                 </p>
                 {transferError.message && (
                   <p className="break-words overflow-hidden mt-2 text-xs opacity-80">
