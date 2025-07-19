@@ -20,6 +20,7 @@ import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useReadContract,
 } from "wagmi";
 import { MagicEdenResponse, TokenWithOwnership } from "@/types";
 import { CollectionResponse } from "@/types/collection";
@@ -28,7 +29,7 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import generateRaceCharacters from "@/lib/generateRaceCharacters";
 
-// Define the type for the context valuea
+// Define the type for the context value
 interface RaffleContextType {
   // State
   selectedIdx: number | null;
@@ -82,6 +83,9 @@ interface RaffleContextType {
   isTransferPending: boolean;
   isTransferTxLoading: boolean;
   isTransferTxSuccess: boolean;
+  // Approval status
+  isApproved: boolean;
+  isApprovalLoading: boolean;
   // Handlers
   handleApprove: () => void;
   handleTransfer: (winner: string) => void;
@@ -101,21 +105,17 @@ export default function RaffleContextProvider({
   children: React.ReactNode;
 }) {
   // State
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null); // collection index
-  const [selectedTokenIdx, setSelectedTokenIdx] = useState(0); // NFT index within tokens
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [selectedTokenIdx, setSelectedTokenIdx] = useState(0);
   const [addressInput, setAddressInput] = useState("");
   const [winnerCount, setWinnerCount] = useState(1);
   const [winners, setWinners] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
-  const { address: userAddress } = useAccount();
   const [raceInProgress, setRaceInProgress] = useState(false);
   const [racePositions, setRacePositions] = useState<number[]>([]);
   const [raceWinnerIdx, setRaceWinnerIdx] = useState<number | null>(null);
   const [raceParticipants, setRaceParticipants] = useState<
-    {
-      address: string;
-      character: string;
-    }[]
+    { address: string; character: string }[]
   >([]);
   const [nftContractAddress, setNftContractAddress] = useState<
     `0x${string}` | null
@@ -124,7 +124,9 @@ export default function RaffleContextProvider({
   const raceInterval = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Memoized address parsing/validation
+  const { address: userAddress } = useAccount();
+
+  // Address parsing/validation
   const parsedAddresses = useMemo(
     () =>
       addressInput
@@ -144,7 +146,7 @@ export default function RaffleContextProvider({
     [uniqueAddresses]
   );
 
-  // Data
+  // Data hooks
   const {
     data: collections,
     isError: isCollectionsError,
@@ -164,19 +166,28 @@ export default function RaffleContextProvider({
   const userTokenNFTs = tokens?.tokens || [];
   const selectedNFT = userTokenNFTs[selectedTokenIdx];
 
-  // Approval/Transfer
+  // Check approval status based on token standard
+  const {
+    data: isApproved,
+    isLoading: isApprovalLoading,
+    refetch: refetchApproval,
+  } = useReadContract({
+    address: selectedNFT?.token.contract as `0x${string}`,
+    abi: NFTTransferABI,
+    functionName: "isApprovedForAll",
+    args: [userAddress!, NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`],
+    query: {
+      enabled: !!selectedNFT && !!userAddress && !!NEXT_PUBLIC_CONTRACT_ADDRESS,
+    },
+  });
+
+  // Write contracts
   const {
     writeContract: writeApprove,
     data: approveData,
     isPending: isApprovePending,
     error: approveError,
   } = useWriteContract();
-
-  const { isLoading: isApprovalTxLoading, isSuccess: isApprovalTxSuccess } =
-    useWaitForTransactionReceipt({
-      hash: approveData,
-      query: { enabled: !!approveData },
-    });
 
   const {
     writeContract: writeTransfer,
@@ -185,17 +196,31 @@ export default function RaffleContextProvider({
     error: transferError,
   } = useWriteContract();
 
+  // Transaction receipts
+  const { isLoading: isApprovalTxLoading, isSuccess: isApprovalTxSuccess } =
+    useWaitForTransactionReceipt({
+      hash: approveData,
+      query: { enabled: !!approveData },
+    });
+
   const { isLoading: isTransferTxLoading, isSuccess: isTransferTxSuccess } =
     useWaitForTransactionReceipt({
       hash: transferData,
       query: { enabled: !!transferData },
     });
 
-  // Sonner toast for approval
+  // Refetch approval status after successful approval
+  useEffect(() => {
+    if (isApprovalTxSuccess) {
+      refetchApproval();
+    }
+  }, [isApprovalTxSuccess, refetchApproval]);
+
+  // Toast notifications
   useEffect(() => {
     if (approveData) {
       toast(
-        <div className="z-50 flex items-center gap-4 p-4 rounded-md bg-[#1a1333]! bg-gradient-to-r from-[#2a174a]/90 via-[#6E54FF]/80 to-[#836EF9]/80 shadow-lg border border-[#6E54FF] font-semibold text-white text-base drop-shadow-sm">
+        <div className="z-50 flex items-center gap-4 p-4 rounded-md bg-[#1a1333] bg-gradient-to-r from-[#2a174a]/90 via-[#6E54FF]/80 to-[#836EF9]/80 shadow-lg border border-[#6E54FF] font-semibold text-white text-base drop-shadow-sm">
           <span className="text-slate-500">Approval Successful!</span>
           <Link
             href={`https://testnet.monadexplorer.com/tx/${approveData}`}
@@ -212,11 +237,10 @@ export default function RaffleContextProvider({
     }
   }, [approveData]);
 
-  // Sonner toast for transfer
   useEffect(() => {
     if (transferData) {
       toast(
-        <div className="z-50 flex items-center gap-4 p-4 rounded-md bg-[#1a1333]! bg-gradient-to-r from-[#2a174a]/90 via-[#6E54FF]/80 to-[#836EF9]/80 shadow-lg border border-[#6E54FF] font-semibold text-white text-base drop-shadow-sm">
+        <div className="z-50 flex items-center gap-4 p-4 rounded-md bg-[#1a1333] bg-gradient-to-r from-[#2a174a]/90 via-[#6E54FF]/80 to-[#836EF9]/80 shadow-lg border border-[#6E54FF] font-semibold text-white text-base drop-shadow-sm">
           <span className="text-white">Transfer Successful!</span>
           <Link
             href={`https://testnet.monadexplorer.com/tx/${transferData}`}
@@ -233,7 +257,7 @@ export default function RaffleContextProvider({
     }
   }, [transferData]);
 
-  // Derived
+  // Validation
   const validParticipants =
     validAddresses.length >= 2 &&
     winnerCount >= 1 &&
@@ -242,6 +266,7 @@ export default function RaffleContextProvider({
   // Handlers
   const handleApprove = () => {
     if (!selectedNFT || !NEXT_PUBLIC_CONTRACT_ADDRESS) return;
+
     writeApprove({
       address: selectedNFT.token.contract as `0x${string}`,
       abi: NFTTransferABI,
@@ -251,16 +276,34 @@ export default function RaffleContextProvider({
   };
 
   const handleTransfer = (winner: string) => {
-    writeTransfer({
-      address: NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      abi: NFTTransferABI,
-      functionName: "transferNFT",
-      args: [
-        selectedNFT.token.contract as `0x${string}`,
-        BigInt(selectedNFT.token.tokenId),
-        winner as `0x${string}`,
-      ],
-    });
+    if (!selectedNFT || !NEXT_PUBLIC_CONTRACT_ADDRESS) return;
+
+    if (selectedNFT.token.kind === "erc1155") {
+      //erc1155 transfer
+      writeTransfer({
+        address: NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+        abi: NFTTransferABI,
+        functionName: "transferERC1155",
+        args: [
+          selectedNFT.token.contract as `0x${string}`,
+          BigInt(selectedNFT.token.tokenId),
+          winner as `0x${string}`,
+          1n,
+        ],
+      });
+    } else {
+      //erc721 transfer
+      writeTransfer({
+        address: NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+        abi: NFTTransferABI,
+        functionName: "transferERC721",
+        args: [
+          selectedNFT.token.contract as `0x${string}`,
+          BigInt(selectedNFT.token.tokenId),
+          winner as `0x${string}`,
+        ],
+      });
+    }
   };
 
   const handleStartRace = () => {
@@ -286,6 +329,7 @@ export default function RaffleContextProvider({
       audioRef.current.currentTime = 0;
       audioRef.current.play();
     }
+
     const numParticipants = validAddresses.length;
     const raceCharacters = generateRaceCharacters(numParticipants);
     const shuffledAddresses = [...validAddresses].sort(
@@ -349,6 +393,8 @@ export default function RaffleContextProvider({
     isTransferPending,
     isTransferTxLoading,
     isTransferTxSuccess,
+    isApproved: isApproved || false,
+    isApprovalLoading,
     handleApprove,
     handleTransfer,
     handleStartRace,

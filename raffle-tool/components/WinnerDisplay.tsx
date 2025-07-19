@@ -83,13 +83,13 @@ export default function WinnerDisplay() {
                 <Button
                   size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white font-medium disabled:cursor-not-allowed"
-                  disabled={
-                    isApprovePending ||
-                    isApprovalTxLoading ||
-                    (isApprovalTxSuccess
-                      ? isTransferPending || isTransferTxLoading
-                      : !selectedNFT)
-                  }
+                  // disabled={
+                  //   isApprovePending ||
+                  //   isApprovalTxLoading ||
+                  //   (isApprovalTxSuccess
+                  //     ? isTransferPending || isTransferTxLoading
+                  //     : !selectedNFT)
+                  // }
                   onClick={() =>
                     isApprovalTxSuccess
                       ? handleTransfer(winner)

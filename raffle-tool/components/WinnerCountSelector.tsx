@@ -18,7 +18,7 @@ export default function WinnerCountSelector() {
         htmlFor="winner-count"
         className="block mb-3 font-semibold text-purple-300"
       >
-        Number of Winners (one winner atm, soon to be multiple)
+        Number of Winners
       </Label>
       <Select
         value={String(winnerCount)}

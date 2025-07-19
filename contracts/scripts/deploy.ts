@@ -5,7 +5,7 @@ async function main() {
   console.log("Deploying contracts with account:", deployer.address);
 
   // Deploy Transfer
-  const Transfer = await hre.ethers.getContractFactory("Transfer");
+  const Transfer = await hre.ethers.getContractFactory("NFTTranster");
   const raffle = await Transfer.deploy();
   await raffle.waitForDeployment();
 
